@@ -29,7 +29,7 @@ hw06/
    ```bash
    createdb homework06
    psql homework06
-````
+   ```
 
 3. **Create table**
 
