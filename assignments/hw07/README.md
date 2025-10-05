@@ -1,4 +1,3 @@
-```markdown
 # Homework 07 — ER Modeling, Joins/Subqueries, and Normalization (PostgreSQL)
 
 Create ER diagrams from existing tables, write join/subquery/aggregation queries, stage CSV data, normalize it, and hand-write DDL.
@@ -265,6 +264,4 @@ CREATE TABLE report_symptoms (
 * Exploration outputs are kept short (≤10 rows) and pasted as SQL comments in `src/part3_03_explore.sql`.
 * Some fields in CAERS are loosely typed on staging for convenience and are tightened in the normalized model.
 
-```
-```
 
