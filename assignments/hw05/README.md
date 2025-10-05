@@ -9,7 +9,7 @@ Single notebook that:
 - `course_schedule.html` — saved semester schedule page (input)
 - `course_catalog.html` — saved catalog page (input)
 
-## Methods (high level)
+## Methods
 ### Courses (HTML → DataFrame → Merge)
 - **Parse:** `BeautifulSoup` (`select`, `select_one`) to extract rows and fields.
 - **Clean:**
