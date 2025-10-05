@@ -1,4 +1,3 @@
-```markdown
 # Homework 06 — Single Table, Import, and SQL (PostgreSQL)
 
 Load a cleaned CSV into PostgreSQL, design a single-table schema, and run basic-to-intermediate SQL queries.
