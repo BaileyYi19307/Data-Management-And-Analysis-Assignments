@@ -1,4 +1,3 @@
-```markdown
 # Homework 08 — Windows, Views, Indexing, and SQLAlchemy (Olympics)
 
 A PostgreSQL + Python (SQLAlchemy) exercise using the Kaggle Olympic history dataset (1896–2016). Work includes importing CSVs, creating a view, writing window-function queries, profiling with `EXPLAIN ANALYZE` and indexes, and interacting with the database via SQLAlchemy ORM.
@@ -220,7 +219,4 @@ FROM 'athlete_events.csv' WITH CSV HEADER NULL 'NA'
 * CSVs are large; keep them out of version control if necessary.
 * Window functions rely on clean `year/medal` values; `NA` is imported as `NULL`.
 * The `athlete_event` → `noc_region` link is via `noc` and may be missing; the view normalizes these cases.
-
-```
-```
 
