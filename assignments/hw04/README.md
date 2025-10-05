@@ -1,4 +1,4 @@
-```markdown
+
 # Homework 04 — Pandas Basics
 
 Two-part assignment demonstrating data import, cleaning, analysis, joins, and visualization in Pandas.
