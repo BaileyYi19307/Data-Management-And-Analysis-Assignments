@@ -1,4 +1,3 @@
-````markdown
 # Homework 05 — Data from the Web & Combining Data (Single Notebook)
 
 Single notebook that:
@@ -53,6 +52,5 @@ jupyter notebook
 
 Open **`courses.ipynb`** and run all cells from top to bottom.
 
-```
-```
+
 
