@@ -1,78 +1,138 @@
-# Homework 05 — Data from the Web & Combining Data
 
-Single-notebook project that:
-- Parses saved HTML for the semester **course schedule** and **course catalog**, cleans fields, and **merges** by course number.
-- Retrieves paginated **JSON** (Studio Ghibli films), loads to pandas, and **aggregates** by director (average Rotten Tomatoes score, film count).
+# Homework 06 — Single Table, CSV Import, and SQL (PostgreSQL)
 
-## Files
-- `courses.ipynb` — contains both parts (courses + films)
-- `course_schedule.html` — saved schedule page (input)
-- `course_catalog.html` — saved catalog page (input)
+Load a cleaned CSV into PostgreSQL, design a single-table schema, and run queries for basic analysis.
 
-## Datasets
-### Course Schedule & Catalog (HTML)
-- **Inputs:** `course_schedule.html`, `course_catalog.html`
-- **Fields used (subset):**  
-  - Schedule: `Number-Section`, `Name`, `Instructor`, `Time`  
-  - Catalog: `Number`, `Prereqs`, `Points`
+## Contents
+- **Data prep:** Convert raw NYC Open Data (Squirrel Census) to a clean CSV
+- **Schema:** Single-table design with appropriate types and a surrogate primary key
+- **Import:** Client-side `\copy` into PostgreSQL
+- **Queries:** Row counts, selects with sort, distincts, group-by + having, and custom insights
 
-### Studio Ghibli Films (JSON)
-- **Endpoint (paginated):** `.../films?_page=1`  
-- **Fields used (subset):** `title`, `director`, `rt_score`
+## Dataset
+- **Title:** 2018 Central Park Squirrel Census — Squirrel Data  
+- **Source:** NYC Open Data (The Squirrel Census)  
+- **Records:** 3,023  
+- **Fields used:** `Primary Fur Color`, `Above Ground Sighter Measurement`, `Date`, `X` (Longitude), `Y` (Latitude), `Location`
 
 ## Methods
-### Courses (HTML → DataFrames → Merge)
-- HTML parsed with **BeautifulSoup** (`select`, `select_one`).
-- Cleaning:
-  - Remove zero-width spaces in course numbers (`.replace('\u200b','')`).
-  - Split `Number-Section` → `Number` (e.g., `CSCI-UA.0480`) and `Section` (e.g., `001`) via regex extract.
-  - Normalize instructor strings; handle multi-number rows by duplicating.
-- Merge catalog metadata (`Prereqs`, `Points`) via `pd.merge(..., on='Number', how='left')`.
-- Output columns: `Number`, `Name`, `Instructor`, `Time`, `Prereqs`, `Points`.
+### Conversion (→ `squirrel_census.csv`)
+- Keep relevant columns; rename for clarity:
+  - `X` → `Longitude`, `Y` → `Latitude`, `Location` → `AboveOrBelowGround`
+- Normalize values (e.g., `"FALSE"` → `0` for height)
+- Parse `Date` (`%m%d%Y`) to SQL `DATE`
+- Export to CSV without index
 
-### Films (JSON API → DataFrame → Aggregation)
-- Paginate with `requests.get(...).json()` until empty page; concat to a single DataFrame.
-- Convert `rt_score` to numeric and `groupby('director')` to compute:
-  - `avg_rt_score` (mean)
-  - `film_count` (size)
-- Sort by `film_count` and `avg_rt_score`.
+### Schema (→ `create_table.sql`)
+```sql
+DROP TABLE IF EXISTS squirrel_data;
+CREATE TABLE squirrel_data (
+    id SERIAL PRIMARY KEY,
+    primary_fur_color TEXT,
+    above_ground_sighter_measurement INT,
+    date DATE,
+    longitude FLOAT,
+    latitude FLOAT,
+    above_or_below_ground TEXT
+);
+````
 
-## Results (high level)
-- **Courses:** Left join preserves all scheduled classes and attaches `Prereqs`/`Points` where available; standardized identifiers enable a clean merge.
-- **Films:** Director-level table showing number of films and average Rotten Tomatoes scores derived from the paginated JSON.
+**Design notes:** Surrogate `id` key; allow NULLs where the source has missing values; geographic fields stored as `FLOAT`; dates stored as `DATE`.
 
-## Project Structure
+### Import (→ `import_csv.sql`)
+
+Client-side import to avoid server path issues:
+
+```sql
+\copy squirrel_data(
+    primary_fur_color,
+    above_ground_sighter_measurement,
+    date,
+    longitude,
+    latitude,
+    above_or_below_ground
+)
+FROM 'squirrel_census.csv'
+DELIMITER ','
+CSV HEADER;
 ```
 
-hw05/
-├── README.md
-├── courses.ipynb
-├── course_schedule.html
-└── course_catalog.html
+### Queries (→ `queries.sql`)
 
-````
+Covers:
+
+* Total row count
+* First 15 rows (3 columns), then sorted
+* Add and update a new column
+* Distinct values
+* Group + aggregate (counts)
+* Group filtering with `HAVING`
+* Additional insights:
+
+  * Max and average height above ground
+  * Count of “Above Ground” sightings
+  * Busiest sighting date
+
+## Project Structure
+
+```
+hw06/
+├── README.md
+├── convert.ipynb
+├── squirrel_census.csv
+├── create_table.sql
+├── import_csv.sql
+└── queries.sql
+```
 
 ## Requirements
-- Python 3.x  
-- pandas  
-- requests  
-- beautifulsoup4  
-- lxml  
-- jupyter
 
-Install:
+* PostgreSQL 12+ (server and `psql` client)
+* Python 3.x (for conversion)
+* Jupyter (optional, to run the notebook)
+
+Install (macOS example):
+
 ```bash
-pip install pandas requests beautifulsoup4 lxml jupyter
-````
+brew install postgresql
+brew services start postgresql
+```
 
 ## How to Run
 
-```bash
-jupyter lab
-# or
-jupyter notebook
+1. **Create database**
+
+   ```bash
+   createdb homework06
+   psql homework06
+   ```
+2. **Create table**
+
+   ```sql
+   \i create_table.sql
+   ```
+3. **Import CSV**
+
+   ```sql
+   \i import_csv.sql
+   ```
+4. **Run queries**
+
+   ```bash
+   psql homework06 -f queries.sql
+   ```
+
+   or inside `psql`:
+
+   ```sql
+   \i queries.sql
+   ```
+
+## Results
+
+* ~3k rows imported successfully with `\copy`.
+* Grouped counts by fur color and computed height statistics.
+* Identified the most active sighting date.
+
 ```
-
-Open `courses.ipynb` and run all cells from top to bottom.
-
 ```
